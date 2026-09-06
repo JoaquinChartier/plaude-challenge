@@ -86,7 +86,6 @@ export default function Home() {
       <header>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Plaude challenge</p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight">General agent with a human checkpoint</h1>
           </div>
           <button type="button" onClick={() => setSettingsOpen((open) => !open)} aria-expanded={settingsOpen} className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
