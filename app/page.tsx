@@ -35,6 +35,16 @@ export default function Home() {
       .catch((error: Error) => setModelsError(error.message));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/config")
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error ?? "Could not load configuration.");
+        if (!body.configured) setSettingsOpen(true);
+      })
+      .catch(() => setSettingsOpen(true));
+  }, []);
+
   const transport = useMemo(
     () =>
       new WorkflowChatTransport({
