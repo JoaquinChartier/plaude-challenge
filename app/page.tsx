@@ -100,7 +100,6 @@ export default function Home() {
           <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
             <div>
               <h2 className="font-semibold">Conversation</h2>
-              <p className="text-sm text-slate-500">Durable workflow, Slack approval enabled</p>
             </div>
             {awaitingApproval && <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">Awaiting approval</span>}
           </div>
