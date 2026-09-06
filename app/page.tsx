@@ -15,7 +15,7 @@ function approvalPart(part: unknown) {
 
 export default function Home() {
   const [instructions, setInstructions] = useState(defaultInstructions);
-  const [model, setModel] = useState("anthropic/claude-sonnet-4");
+  const [model, setModel] = useState("openai/gpt-5.6-luna");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [modelSearch, setModelSearch] = useState("");
   const [models, setModels] = useState<Model[]>([]);
