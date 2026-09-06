@@ -43,7 +43,7 @@ Browser
 ## Slack setup
 
 1. Create an app at [api.slack.com/apps](https://api.slack.com/apps) from scratch.
-2. Add bot token scopes `chat:write` and `chat:write.public`.
+2. Add bot token scopes `chat:write`, `chat:write.public`, `channels:history`, and `groups:history`.
 3. Enable Interactivity and set the Request URL to `https://<your-domain>/api/slack/interactions`.
 4. Install the app and copy the bot token and signing secret into `.env`.
 5. Invite the bot to the approval channel and set its channel ID in `.env`.

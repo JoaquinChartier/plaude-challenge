@@ -1,5 +1,5 @@
 import { approvalHook } from "@/lib/workflow/hooks";
-import { verifySlackSignature } from "@/lib/slack";
+import { deleteApprovalMessage, verifySlackSignature } from "@/lib/slack";
 
 export async function POST(request: Request) {
   const rawBody = await request.text();
@@ -14,6 +14,8 @@ export async function POST(request: Request) {
     const payload = JSON.parse(payloadValue) as {
       user?: { id?: string };
       actions?: Array<{ action_id?: string; value?: string }>;
+      channel?: { id?: string };
+      message?: { ts?: string };
     };
     const action = payload.actions?.[0];
     if (!action?.value || !action.action_id?.startsWith("approval_")) return new Response("Invalid action", { status: 400 });
@@ -22,6 +24,7 @@ export async function POST(request: Request) {
       approved: action.action_id === "approval_approve",
       by: payload.user?.id ?? "Slack reviewer",
     });
+    await deleteApprovalMessage(action.value, { channelId: payload.channel?.id, ts: payload.message?.ts });
     return Response.json({ text: "Decision recorded." });
   } catch {
     return new Response("Approval request was not found or already resolved.", { status: 404 });
