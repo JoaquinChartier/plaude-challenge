@@ -87,7 +87,7 @@ export default function Home() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Plaude challenge</p>
-            <h1 className="mt-2 text-3xl font-semibold tracking-tight">Support agent with a human checkpoint</h1>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight">General agent with a human checkpoint</h1>
           </div>
           <button type="button" onClick={() => setSettingsOpen((open) => !open)} aria-expanded={settingsOpen} className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
             Settings
@@ -138,7 +138,7 @@ export default function Home() {
           <form onSubmit={submit} className="border-t border-slate-200 p-4">
             {modelsError && <p className="mb-2 text-xs text-amber-700">{modelsError}</p>}
             <div className="flex gap-2">
-              <input value={input} onChange={(event) => setInput(event.target.value)} disabled={status !== "ready"} placeholder={awaitingApproval ? "Waiting for a human decision..." : "Ask the support agent"} className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-400 focus:ring-2 disabled:bg-slate-100" />
+              <input value={input} onChange={(event) => setInput(event.target.value)} disabled={status !== "ready"} placeholder={awaitingApproval ? "Waiting for a human decision..." : "Ask the agent"} className="min-w-0 flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none ring-slate-400 focus:ring-2 disabled:bg-slate-100" />
               <button disabled={status !== "ready" || !input.trim()} className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40">Send</button>
             </div>
           </form>
