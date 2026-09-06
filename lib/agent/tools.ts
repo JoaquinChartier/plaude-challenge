@@ -2,7 +2,7 @@ import { WebClient } from "@slack/web-api";
 import { sleep } from "workflow";
 import { z } from "zod";
 import { approvalHook } from "@/lib/workflow/hooks";
-import { approvalBlocks } from "@/lib/slack";
+import { approvalBlocks, type ApprovalDetails } from "@/lib/slack";
 
 export async function lookupOrder(orderId: string) {
   "use step";
@@ -34,7 +34,7 @@ export async function executeAction(action: string, params: string) {
   };
 }
 
-async function postApprovalToSlack(details: { action: string; params: string }, token: string) {
+async function postApprovalToSlack(details: ApprovalDetails, token: string) {
   "use step";
 
   if (!process.env.SLACK_BOT_TOKEN || !process.env.SLACK_APPROVAL_CHANNEL_ID) return;
@@ -46,7 +46,7 @@ async function postApprovalToSlack(details: { action: string; params: string }, 
   });
 }
 
-async function requestHumanApproval(input: { action: string; params: string }, options: { toolCallId: string }) {
+async function requestHumanApproval(input: ApprovalDetails, options: { toolCallId: string }) {
   const token = `approval:${options.toolCallId}`;
   await postApprovalToSlack(input, token);
 
@@ -73,7 +73,7 @@ export const tools = {
     execute: (input: { orderId: string; amount: number }) => issueRefund(input.orderId, input.amount),
   },
   executeAction: {
-     description: "Execute a generic action. Follow the approval policy before calling this tool.",
+    description: "Execute a generic action. Follow the approval policy before calling this tool.",
     inputSchema: z.object({ action: z.string(), params: z.string() }),
     execute: (input: { action: string; params: string }) => executeAction(input.action, input.params),
   },
