@@ -73,7 +73,7 @@ export const tools = {
     execute: (input: { orderId: string; amount: number }) => issueRefund(input.orderId, input.amount),
   },
   executeAction: {
-    description: "Execute a generic support action. Follow the approval policy before calling this tool.",
+     description: "Execute a generic action. Follow the approval policy before calling this tool.",
     inputSchema: z.object({ action: z.string(), params: z.string() }),
     execute: (input: { action: string; params: string }) => executeAction(input.action, input.params),
   },

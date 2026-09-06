@@ -1,10 +1,10 @@
-# Plaude Support Agent
+# General Agent
 
-A minimal Next.js support assistant powered by WorkflowDevKit's `DurableAgent`. The agent follows editable plain-text instructions and pauses durable execution when a refund, high-value action, or ambiguous request needs human approval. Approval can arrive from Slack or the in-app fallback.
+A minimal Next.js general agent powered by WorkflowDevKit's `DurableAgent`. The agent follows editable plain-text instructions and pauses durable execution when a refund, high-value action, or ambiguous request needs human approval. Approval can arrive from Slack or the in-app fallback.
 
 ## Run locally
 
-Prerequisites: Node.js 20+ and npm.
+Prerequisites: Node.js 24 and npm.
 
 ```bash
 make run
@@ -31,7 +31,7 @@ For development without the prompt, create `.env` from `.env.example` and run `n
 Browser
   POST /api/chat { messages, instructions, model }
     -> DurableAgent workflow
-      -> OpenRouter model and support tools
+      -> OpenRouter model and agent tools
       -> requestHumanApproval creates a durable hook
         -> Slack Approve/Deny button or /api/approve
       -> hook resumes the workflow
@@ -43,7 +43,7 @@ Browser
 ## Slack setup
 
 1. Create an app at [api.slack.com/apps](https://api.slack.com/apps) from scratch.
-2. Add bot token scopes `chat:write` and `chat:write.public`.
+2. Add bot token scopes `chat:write`, `chat:write.public`, `channels:history`, and `groups:history`.
 3. Enable Interactivity and set the Request URL to `https://<your-domain>/api/slack/interactions`.
 4. Install the app and copy the bot token and signing secret into `.env`.
 5. Invite the bot to the approval channel and set its channel ID in `.env`.
@@ -59,7 +59,7 @@ Deploy the repository as a Next.js app on Vercel and add the same environment va
 - `app/page.tsx`: chat UI, model search, and editable instructions.
 - `lib/workflow/chat.ts`: durable agent workflow and streamed output.
 - `lib/agent/instructions.ts`: default plain-text policy.
-- `lib/agent/tools.ts`: mock support tools and approval hook integration.
+- `lib/agent/tools.ts`: mock agent tools and approval hook integration.
 - `lib/workflow/hooks.ts`: typed durable approval hook.
 - `lib/slack.ts`: Block Kit message builder and HMAC verification.
 - `app/api`: chat, model proxy, approval fallback, and Slack interaction endpoints.

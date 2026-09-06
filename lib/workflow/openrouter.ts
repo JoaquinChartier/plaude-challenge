@@ -14,7 +14,7 @@ export function openrouter(modelId: string) {
       name: "openrouter",
       headers: {
         "HTTP-Referer": process.env.APP_URL ?? "http://localhost:3000",
-        "X-Title": "Plaude Support Agent",
+        "X-Title": "General Agent",
       },
     });
 

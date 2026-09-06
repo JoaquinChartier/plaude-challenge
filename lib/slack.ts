@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { WebClient } from "@slack/web-api";
 
 export type ApprovalDetails = {
   action: string;
@@ -55,4 +56,27 @@ export function verifySlackSignature(rawBody: string, timestamp: string | null, 
   const expectedBuffer = Buffer.from(expected);
   const signatureBuffer = Buffer.from(signature);
   return expectedBuffer.length === signatureBuffer.length && crypto.timingSafeEqual(expectedBuffer, signatureBuffer);
+}
+
+export async function deleteApprovalMessage(token: string, message?: { channelId?: string; ts?: string }) {
+  if (!process.env.SLACK_BOT_TOKEN || !process.env.SLACK_APPROVAL_CHANNEL_ID) return;
+
+  const client = new WebClient(process.env.SLACK_BOT_TOKEN);
+  try {
+    if (message?.channelId && message.ts) {
+      await client.chat.delete({ channel: message.channelId, ts: message.ts });
+      return;
+    }
+
+    const history = await client.conversations.history({
+      channel: process.env.SLACK_APPROVAL_CHANNEL_ID,
+      limit: 100,
+    });
+    const approvalMessage = history.messages?.find((item) => JSON.stringify(item.blocks ?? []).includes(token));
+    if (approvalMessage?.ts) {
+      await client.chat.delete({ channel: process.env.SLACK_APPROVAL_CHANNEL_ID, ts: approvalMessage.ts });
+    }
+  } catch {
+    // The approval decision is already recorded; message cleanup is best effort.
+  }
 }

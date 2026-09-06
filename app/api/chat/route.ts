@@ -8,7 +8,7 @@ export const maxDuration = 60;
 const requestSchema = z.object({
   messages: z.array(z.unknown()),
   instructions: z.string().optional().default(""),
-  model: z.string().min(1).default("anthropic/claude-sonnet-4"),
+  model: z.string().min(1).default("openai/gpt-5.6-luna"),
 });
 
 export async function POST(request: Request) {
