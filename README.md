@@ -4,7 +4,7 @@ A minimal Next.js support assistant powered by WorkflowDevKit's `DurableAgent`. 
 
 ## Run locally
 
-Prerequisites: Node.js 20+ and npm.
+Prerequisites: Node.js 24 and npm.
 
 ```bash
 make run
