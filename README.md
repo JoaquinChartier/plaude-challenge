@@ -2,6 +2,20 @@
 
 A minimal Next.js general agent powered by WorkflowDevKit's `DurableAgent`. The agent follows editable plain-text instructions and pauses durable execution when a refund, high-value action, or ambiguous request needs human approval. Approval can arrive from Slack or the in-app fallback.
 
+## Demo
+
+### Settings
+
+![Agent interface](resources/Screenshot%20from%202026-09-06%2014-23-55.png)
+
+### Example refusal 1
+
+![Chat demo](resources/agent-demo-chat.gif)
+
+### Example refusal 2
+
+![Approval demo](resources/agent-demo-approval.gif)
+
 ## Run locally
 
 Prerequisites: Node.js 24 and npm.
@@ -25,21 +39,6 @@ For development without the prompt, create `.env` from `.env.example` and run `n
 | `APPROVAL_TIMEOUT_MS` | no | Approval timeout, default `86400000` (24 hours). |
 | `APP_URL` | no | Referer sent to OpenRouter, default `http://localhost:3000`. |
 
-## How it works
-
-```text
-Browser
-  POST /api/chat { messages, instructions, model }
-    -> DurableAgent workflow
-      -> OpenRouter model and agent tools
-      -> requestHumanApproval creates a durable hook
-        -> Slack Approve/Deny button or /api/approve
-      -> hook resumes the workflow
-    <- streamed UI message chunks
-```
-
-`WorkflowChatTransport` reconnects to `/api/chat/:runId/stream` when the request or hosting function ends while the workflow is paused. A suspended workflow uses a durable hook and timer rather than keeping a request handler busy.
-
 ## Slack setup
 
 1. Create an app at [api.slack.com/apps](https://api.slack.com/apps) from scratch.
@@ -53,13 +52,3 @@ The interaction endpoint verifies Slack's HMAC signature and rejects requests ol
 ## Deploy
 
 Deploy the repository as a Next.js app on Vercel and add the same environment variables in the project settings. Set the Slack Interactivity Request URL to the deployed `/api/slack/interactions` endpoint.
-
-## Project structure
-
-- `app/page.tsx`: chat UI, model search, and editable instructions.
-- `lib/workflow/chat.ts`: durable agent workflow and streamed output.
-- `lib/agent/instructions.ts`: default plain-text policy.
-- `lib/agent/tools.ts`: mock agent tools and approval hook integration.
-- `lib/workflow/hooks.ts`: typed durable approval hook.
-- `lib/slack.ts`: Block Kit message builder and HMAC verification.
-- `app/api`: chat, model proxy, approval fallback, and Slack interaction endpoints.
