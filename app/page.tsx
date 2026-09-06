@@ -17,6 +17,7 @@ export default function Home() {
   const [instructions, setInstructions] = useState(defaultInstructions);
   const [model, setModel] = useState("openai/gpt-5.6-luna");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [slackConfigured, setSlackConfigured] = useState<boolean | null>(null);
   const [modelSearch, setModelSearch] = useState("");
   const [models, setModels] = useState<Model[]>([]);
   const [modelsError, setModelsError] = useState("");
@@ -40,9 +41,13 @@ export default function Home() {
       .then(async (response) => {
         const body = await response.json();
         if (!response.ok) throw new Error(body.error ?? "Could not load configuration.");
+        setSlackConfigured(Boolean(body.slackConfigured));
         if (!body.configured) setSettingsOpen(true);
       })
-      .catch(() => setSettingsOpen(true));
+      .catch(() => {
+        setSlackConfigured(false);
+        setSettingsOpen(true);
+      });
   }, []);
 
   const transport = useMemo(
@@ -127,12 +132,13 @@ export default function Home() {
                       <div key={index} className="space-y-3">
                         <p className="font-medium">Human approval required</p>
                         {approval.input && <p className="text-xs text-slate-600">{approval.input.action}: {approval.input.params}</p>}
-                        {pending && approval.toolCallId && (
+                        {pending && approval.toolCallId && slackConfigured === false && (
                           <div className="flex gap-2">
                             <button className="rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white" onClick={() => decide(`approval:${approval.toolCallId}`, true)}>Approve</button>
                             <button className="rounded-md bg-rose-600 px-3 py-1.5 text-xs font-medium text-white" onClick={() => decide(`approval:${approval.toolCallId}`, false)}>Deny</button>
                           </div>
                         )}
+                        {pending && slackConfigured === true && <p className="text-xs text-slate-500">Approval requested in Slack.</p>}
                       </div>
                     );
                   })}
