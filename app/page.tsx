@@ -2,20 +2,37 @@
 
 import { WorkflowChatTransport } from "@workflow/ai";
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { DEFAULT_MODEL } from "@/lib/agent/constants";
 import { defaultInstructions } from "@/lib/agent/instructions";
 
 type Model = { id: string; name?: string };
+type ApprovalPart = {
+  type?: string;
+  state?: string;
+  toolCallId?: string;
+  input?: { action?: string; params?: string };
+};
 
-function approvalPart(part: unknown) {
-  const value = part as { type?: string; state?: string; toolCallId?: string; input?: { action?: string; params?: string }; output?: unknown };
+function approvalPart(part: unknown): ApprovalPart | null {
+  const value = part as ApprovalPart;
   return value.type === "tool-requestHumanApproval" ? value : null;
+}
+
+function isPendingApproval(part: ApprovalPart | null) {
+  return part?.state === "input-available" || part?.state === "input-streaming";
+}
+
+async function fetchJson(path: string, fallback: string) {
+  const response = await fetch(path);
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.error ?? fallback);
+  return body;
 }
 
 export default function Home() {
   const [instructions, setInstructions] = useState(defaultInstructions);
-  const [model, setModel] = useState("openai/gpt-5.6-luna");
+  const [model, setModel] = useState(DEFAULT_MODEL);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [slackConfigured, setSlackConfigured] = useState<boolean | null>(null);
   const [modelSearch, setModelSearch] = useState("");
@@ -27,20 +44,14 @@ export default function Home() {
   settings.current = { instructions, model };
 
   useEffect(() => {
-    fetch("/api/models")
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error ?? "Could not load models.");
-        setModels(body.data ?? []);
-      })
+    fetchJson("/api/models", "Could not load models.")
+      .then((body) => setModels(body.data ?? []))
       .catch((error: Error) => setModelsError(error.message));
   }, []);
 
   useEffect(() => {
-    fetch("/api/config")
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok) throw new Error(body.error ?? "Could not load configuration.");
+    fetchJson("/api/config", "Could not load configuration.")
+      .then((body) => {
         setSlackConfigured(Boolean(body.slackConfigured));
         if (!body.configured) setSettingsOpen(true);
       })
@@ -69,10 +80,7 @@ export default function Home() {
     .filter((item) => `${item.name ?? ""} ${item.id}`.toLowerCase().includes(modelSearch.toLowerCase()))
     .slice(0, 100);
   const awaitingApproval = messages.some((message) =>
-    message.parts.some((part) => {
-      const approval = approvalPart(part);
-      return approval?.state === "input-available" || approval?.state === "input-streaming";
-    }),
+    message.parts.some((part) => isPendingApproval(approvalPart(part))),
   );
 
   async function submit(event: React.FormEvent) {
@@ -120,14 +128,14 @@ export default function Home() {
 
           <div className="flex-1 space-y-4 overflow-y-auto p-5">
             {messages.length === 0 && <p className="text-sm text-slate-500">Try: “Please refund order 1002 for $249.50.”</p>}
-            {messages.map((message: UIMessage) => (
+            {messages.map((message) => (
               <div key={message.id} className={message.role === "user" ? "ml-auto max-w-[85%]" : "max-w-[90%]"}>
                 <div className={message.role === "user" ? "rounded-xl bg-slate-900 px-4 py-3 text-sm text-white" : "rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-800"}>
                   {message.parts.map((part, index) => {
                     if (part.type === "text") return <p key={index} className="whitespace-pre-wrap">{part.text}</p>;
                     const approval = approvalPart(part);
                     if (!approval) return null;
-                    const pending = approval.state === "input-available" || approval.state === "input-streaming";
+                    const pending = isPendingApproval(approval);
                     return (
                       <div key={index} className="space-y-3">
                         <p className="font-medium">Human approval required</p>
